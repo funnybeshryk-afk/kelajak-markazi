@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import type { SiteSettings } from "@/lib/site-settings";
 
 const NAV_ITEMS = [
   { href: "/", label: "Bosh sahifa" },
@@ -17,11 +16,7 @@ const NAV_ITEMS = [
   { href: "/boglanish", label: "Bog‘lanish" },
 ];
 
-type HeaderProps = {
-  siteSettings: SiteSettings;
-};
-
-export default function Header({ siteSettings }: HeaderProps) {
+export default function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -29,54 +24,44 @@ export default function Header({ siteSettings }: HeaderProps) {
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <>
-      <div className="topbar">
-        <div className="container topbar-inner">
-          <span>📍 {siteSettings.address}</span>
-          <span>✉️ {siteSettings.email}</span>
-          <span>☎️ {siteSettings.phone}</span>
-        </div>
+    <header className="header">
+      <div className="container nav">
+        <Link className="brand" href="/">
+          <Image src="/images/logo.png" alt="Kelajak Markazi" width={180} height={70} priority />
+        </Link>
+
+        <nav>
+          {NAV_ITEMS.map((item) => (
+            <Link key={item.href} href={item.href} className={isActive(item.href) ? "active" : ""}>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <button
+          className="menu-button"
+          aria-label="Menyu"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? "✕" : "☰"}
+        </button>
       </div>
 
-      <header className="header">
-        <div className="container nav">
-          <Link className="brand" href="/">
-            <Image src="/images/logo.png" alt="Kelajak Markazi" width={180} height={70} priority />
-          </Link>
-
-          <nav>
-            {NAV_ITEMS.map((item) => (
-              <Link key={item.href} href={item.href} className={isActive(item.href) ? "active" : ""}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <button
-            className="menu-button"
-            aria-label="Menyu"
-            aria-expanded={open}
-            onClick={() => setOpen((value) => !value)}
-          >
-            {open ? "✕" : "☰"}
-          </button>
+      {open && (
+        <div className="mobile-nav">
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={isActive(item.href) ? "active" : ""}
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
-
-        {open && (
-          <div className="mobile-nav">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={isActive(item.href) ? "active" : ""}
-                onClick={() => setOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        )}
-      </header>
-    </>
+      )}
+    </header>
   );
 }

@@ -19,7 +19,7 @@ export default async function RootLayout({
   return (
     <html lang="uz">
       <body>
-        <Header siteSettings={siteSettings} />
+        <Header />
         <main>{children}</main>
         <Footer siteSettings={siteSettings} />
       </body>
