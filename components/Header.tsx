@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import type { SiteSettings } from "@/lib/site-settings";
 
 const NAV_ITEMS = [
   { href: "/", label: "Bosh sahifa" },
@@ -16,7 +17,11 @@ const NAV_ITEMS = [
   { href: "/boglanish", label: "Bog‘lanish" },
 ];
 
-export default function Header() {
+type HeaderProps = {
+  siteSettings: SiteSettings;
+};
+
+export default function Header({ siteSettings }: HeaderProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -27,9 +32,9 @@ export default function Header() {
     <>
       <div className="topbar">
         <div className="container topbar-inner">
-          <span>📍 Beshariq tumani, Farg‘ona viloyati</span>
-          <span>✉️ info@kelajakmarkazi.uz</span>
-          <span>☎️ +998 90 123 45 67</span>
+          <span>📍 {siteSettings.address}</span>
+          <span>✉️ {siteSettings.email}</span>
+          <span>☎️ {siteSettings.phone}</span>
         </div>
       </div>
 

@@ -1,8 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { directions } from "@/lib/content";
+import type { SiteSettings } from "@/lib/site-settings";
 
-export default function Footer() {
+type FooterProps = {
+  siteSettings: SiteSettings;
+};
+
+export default function Footer({ siteSettings }: FooterProps) {
   return (
     <footer className="footer">
       <div className="container footer-grid">
@@ -36,9 +41,9 @@ export default function Footer() {
         </div>
         <div>
           <h4>Bog‘lanish</h4>
-          <p>📍 Beshariq tumani, Farg‘ona viloyati</p>
-          <p>☎️ +998 90 123 45 67</p>
-          <p>✉️ info@kelajakmarkazi.uz</p>
+          <p>📍 {siteSettings.address}</p>
+          <p>☎️ {siteSettings.phone}</p>
+          <p>✉️ {siteSettings.email}</p>
         </div>
       </div>
       <div className="container footer-bottom">

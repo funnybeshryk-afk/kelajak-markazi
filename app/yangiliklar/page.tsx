@@ -1,14 +1,50 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import NewsCard from "@/components/NewsCard";
-import { newsItems } from "@/lib/content";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Yangiliklar — Kelajak Markazi",
   description: "Kelajak Markazi Beshariq tumani hayotidan so‘nggi yangiliklar.",
 };
 
-export default function YangiliklarPage() {
+type NewsRow = {
+  id: string;
+  published_at: string;
+  title: string;
+  text: string;
+  kind: string;
+};
+
+const UZ_MONTHS = [
+  "YANVAR", "FEVRAL", "MART", "APREL", "MAY", "IYUN",
+  "IYUL", "AVGUST", "SENTYABR", "OKTYABR", "NOYABR", "DEKABR",
+];
+
+function formatNewsDate(iso: string) {
+  const d = new Date(iso);
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = UZ_MONTHS[d.getUTCMonth()];
+  return `${day} ${month}, ${d.getUTCFullYear()}`;
+}
+
+export default async function YangiliklarPage() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("news")
+    .select("id, published_at, title, text, kind")
+    .eq("is_active", true)
+    .order("published_at", { ascending: false })
+    .returns<NewsRow[]>();
+
+  if (error) {
+    // Xatoni yashirmaymiz — server logida ko'rinadi, foydalanuvchiga esa xavfsiz xabar chiqadi.
+    console.error("Supabase: yangiliklarni yuklashda xatolik:", error);
+  }
+
+  const news = data ?? [];
+
   return (
     <>
       <PageHero
@@ -24,19 +60,27 @@ export default function YangiliklarPage() {
             tez orada haqiqiy materiallar bilan almashtiriladi.
           </p>
 
-          <div className="news-grid">
-            {newsItems.map((item, index) => (
-              <NewsCard
-                key={item.id}
-                date={item.date}
-                title={item.title}
-                text={item.text}
-                kind={item.kind}
-                variant={((index % 3) + 1) as 1 | 2 | 3}
-                href="/yangiliklar"
-              />
-            ))}
-          </div>
+          {error ? (
+            <p className="page-note">
+              <strong>Diqqat:</strong> yangiliklarni yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
+            </p>
+          ) : news.length === 0 ? (
+            <p className="page-note">Hozircha yangiliklar mavjud emas.</p>
+          ) : (
+            <div className="news-grid">
+              {news.map((item, index) => (
+                <NewsCard
+                  key={item.id}
+                  date={formatNewsDate(item.published_at)}
+                  title={item.title}
+                  text={item.text}
+                  kind={item.kind}
+                  variant={((index % 3) + 1) as 1 | 2 | 3}
+                  href="/yangiliklar"
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </>

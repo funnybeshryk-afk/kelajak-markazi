@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "Bog‘lanish — Kelajak Markazi",
   description: "Kelajak Markazi Beshariq tumani bilan bog‘lanish uchun aloqa ma’lumotlari.",
 };
 
-const contactItems = [
-  { icon: "📍", title: "Manzil", value: "Beshariq tumani, Farg‘ona viloyati" },
-  { icon: "☎️", title: "Telefon", value: "+998 90 123 45 67" },
-  { icon: "✉️", title: "Email", value: "info@kelajakmarkazi.uz" },
-  { icon: "➤", title: "Telegram", value: "@kelajakmarkazi" },
-];
+export default async function BoglanishPage() {
+  const siteSettings = await getSiteSettings();
 
-export default function BoglanishPage() {
+  const contactItems = [
+    { icon: "📍", title: "Manzil", value: siteSettings.address },
+    { icon: "☎️", title: "Telefon", value: siteSettings.phone },
+    { icon: "✉️", title: "Email", value: siteSettings.email },
+    { icon: "➤", title: "Telegram", value: siteSettings.telegram },
+  ];
+
   return (
     <>
       <PageHero
