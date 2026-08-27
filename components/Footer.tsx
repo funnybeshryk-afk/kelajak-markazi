@@ -1,13 +1,43 @@
 import Image from "next/image";
 import Link from "next/link";
-import { directions } from "@/lib/content";
 import type { SiteSettings } from "@/lib/site-settings";
+import { createPublicClient } from "@/lib/supabase/public";
 
 type FooterProps = {
   siteSettings: SiteSettings;
 };
 
-export default function Footer({ siteSettings }: FooterProps) {
+type DirectionLink = {
+  id: string;
+  slug: string;
+  title: string;
+};
+
+// Same 4 directions the footer has always linked to — used only if Supabase is
+// unreachable or returns no active rows, so the footer nav never goes blank.
+const FALLBACK_DIRECTIONS: DirectionLink[] = [
+  { id: "fallback-it-dasturlash", slug: "it-dasturlash", title: "IT va dasturlash" },
+  { id: "fallback-robototexnika", slug: "robototexnika", title: "Robototexnika" },
+  { id: "fallback-ingliz-tili", slug: "ingliz-tili", title: "Ingliz tili" },
+  { id: "fallback-ijodiy", slug: "ijodiy", title: "Ijodiy yo‘nalishlar" },
+];
+
+export default async function Footer({ siteSettings }: FooterProps) {
+  const supabase = createPublicClient();
+
+  const { data, error } = await supabase
+    .from("directions")
+    .select("id, slug, title")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true })
+    .returns<DirectionLink[]>();
+
+  if (error) {
+    console.error("Supabase: footer uchun yo‘nalishlarni yuklashda xatolik:", error);
+  }
+
+  const directions = data && data.length > 0 ? data : FALLBACK_DIRECTIONS;
+
   return (
     <footer className="footer">
       <div className="container footer-grid">
@@ -34,7 +64,7 @@ export default function Footer({ siteSettings }: FooterProps) {
         <div>
           <h4>Yo‘nalishlarimiz</h4>
           {directions.map((direction) => (
-            <Link key={direction.slug} href={`/yonalishlar/${direction.slug}`}>
+            <Link key={direction.id} href={`/yonalishlar/${direction.slug}`}>
               {direction.title}
             </Link>
           ))}

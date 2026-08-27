@@ -1,27 +1,50 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import SectionTitle from "@/components/SectionTitle";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Biz haqimizda — Kelajak Markazi",
   description: "Kelajak Markazi Beshariq tumani haqida: maqsadimiz, qadriyatlarimiz va yoshlar uchun imkoniyatlar.",
 };
 
-const values = [
-  { icon: "◆", title: "Bilim va rivojlanish", text: "Har bir yoshning bilim olishi va o‘z ustida ishlashini qadrlaymiz." },
-  { icon: "◈", title: "Hamkorlik", text: "Jamoaviy ishlash va o‘zaro qo‘llab-quvvatlashni muhim deb bilamiz." },
-  { icon: "✦", title: "Ijodkorlik", text: "Yangi g‘oyalar va ijodiy yondashuvlarni rag‘batlantiramiz." },
-  { icon: "◎", title: "Hurmat va ochiqlik", text: "Har bir yoshning fikri va tashabbusini hurmat bilan qabul qilamiz." },
-];
+type AboutItemRow = {
+  id: string;
+  icon: string;
+  title: string;
+  text: string;
+};
 
-const opportunities = [
-  { icon: "▣", title: "Yo‘nalishlarni tanlash", text: "O‘z qiziqishlariga mos yo‘nalishni tanlab, bilim olish imkoniyati." },
-  { icon: "⚙", title: "Amaliy mashg‘ulotlar", text: "Nazariy bilimlarni amaliyotda qo‘llash uchun loyihalar ustida ishlash." },
-  { icon: "◉", title: "Tadbir va tanlovlar", text: "Markaz tomonidan tashkil etiladigan tadbirlarda faol ishtirok etish." },
-  { icon: "✦", title: "Ijodiy salohiyat", text: "O‘z iste’dodini namoyon qilish va yangi ko‘nikmalarni kashf etish." },
-];
+export default async function BizHaqimizdaPage() {
+  const supabase = await createClient();
 
-export default function BizHaqimizdaPage() {
+  const [valuesResult, opportunitiesResult] = await Promise.all([
+    supabase
+      .from("about_items")
+      .select("id, icon, title, text")
+      .eq("kind", "value")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .returns<AboutItemRow[]>(),
+    supabase
+      .from("about_items")
+      .select("id, icon, title, text")
+      .eq("kind", "opportunity")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .returns<AboutItemRow[]>(),
+  ]);
+
+  if (valuesResult.error) {
+    console.error("Supabase: qadriyatlarni yuklashda xatolik:", valuesResult.error);
+  }
+  if (opportunitiesResult.error) {
+    console.error("Supabase: imkoniyatlarni yuklashda xatolik:", opportunitiesResult.error);
+  }
+
+  const values = valuesResult.data ?? [];
+  const opportunities = opportunitiesResult.data ?? [];
+
   return (
     <>
       <PageHero
@@ -55,15 +78,23 @@ export default function BizHaqimizdaPage() {
       <section className="section programs-section">
         <div className="container">
           <SectionTitle align="center" label="QADRIYATLARIMIZ" title={<>Bizning <span>qadriyatlarimiz</span></>} />
-          <div className="values-grid">
-            {values.map((value) => (
-              <div className="value-card" key={value.title}>
-                <div className="value-icon">{value.icon}</div>
-                <h3>{value.title}</h3>
-                <p>{value.text}</p>
-              </div>
-            ))}
-          </div>
+          {valuesResult.error ? (
+            <p className="page-note">
+              <strong>Diqqat:</strong> qadriyatlarni yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
+            </p>
+          ) : values.length === 0 ? (
+            <p className="page-note">Hozircha qadriyatlar ro‘yxati bo‘sh.</p>
+          ) : (
+            <div className="values-grid">
+              {values.map((value) => (
+                <div className="value-card" key={value.id}>
+                  <div className="value-icon">{value.icon}</div>
+                  <h3>{value.title}</h3>
+                  <p>{value.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -75,17 +106,25 @@ export default function BizHaqimizdaPage() {
             title={<>Yoshlar uchun <span>imkoniyatlar</span></>}
             description="Kelajak Markazida yoshlar turli yo‘nalishlar bo‘yicha bilim olish, amaliy mashg‘ulotlarda qatnashish va tengdoshlari bilan hamkorlikda ishlash imkoniyatiga ega bo‘ladilar."
           />
-          <div className="opportunities-list">
-            {opportunities.map((item) => (
-              <div className="opportunity-item" key={item.title}>
-                <div className="opportunity-icon">{item.icon}</div>
-                <div>
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
+          {opportunitiesResult.error ? (
+            <p className="page-note">
+              <strong>Diqqat:</strong> imkoniyatlarni yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
+            </p>
+          ) : opportunities.length === 0 ? (
+            <p className="page-note">Hozircha imkoniyatlar ro‘yxati bo‘sh.</p>
+          ) : (
+            <div className="opportunities-list">
+              {opportunities.map((item) => (
+                <div className="opportunity-item" key={item.id}>
+                  <div className="opportunity-icon">{item.icon}</div>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.text}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </>

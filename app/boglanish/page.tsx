@@ -34,7 +34,6 @@ export default async function BoglanishPage() {
                 <div>
                   <h3>{item.title}</h3>
                   <p>{item.value}</p>
-                  <em>Vaqtinchalik ma’lumot — tez orada yangilanadi</em>
                 </div>
               </div>
             ))}

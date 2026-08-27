@@ -1,11 +1,118 @@
 import Link from "next/link";
+import Image from "next/image";
 import SectionTitle from "@/components/SectionTitle";
 import NewsCard from "@/components/NewsCard";
 import EventCard from "@/components/EventCard";
 import DirectionCard from "@/components/DirectionCard";
-import { directions, newsItems, eventItems } from "@/lib/content";
+import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 
-export default function Home() {
+type DirectionRow = {
+  id: string;
+  slug: string;
+  title: string;
+  short_description: string;
+  description: string;
+  symbol: string;
+};
+
+type NewsRow = {
+  id: string;
+  published_at: string;
+  title: string;
+  text: string;
+  kind: string;
+};
+
+type EventRow = {
+  id: string;
+  event_date: string;
+  title: string;
+  text: string;
+};
+
+type GalleryRow = {
+  id: string;
+  title: string;
+  image_url: string | null;
+};
+
+// Matches the fixed 4-slot bento layout in globals.css (.gallery-one spans two
+// rows, .gallery-four spans two columns) — positional, not a cyclic pattern.
+const GALLERY_POSITION_CLASSES = ["gallery-one", "gallery-two", "gallery-three", "gallery-four"];
+
+const UZ_MONTHS = [
+  "YANVAR", "FEVRAL", "MART", "APREL", "MAY", "IYUN",
+  "IYUL", "AVGUST", "SENTYABR", "OKTYABR", "NOYABR", "DEKABR",
+];
+
+function formatNewsDate(iso: string) {
+  const d = new Date(iso);
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = UZ_MONTHS[d.getUTCMonth()];
+  return `${day} ${month}, ${d.getUTCFullYear()}`;
+}
+
+function formatEventDate(dateStr: string) {
+  const d = new Date(dateStr);
+  return {
+    day: String(d.getUTCDate()).padStart(2, "0"),
+    month: UZ_MONTHS[d.getUTCMonth()],
+  };
+}
+
+export default async function Home() {
+  const supabase = await createClient();
+  const publicSupabase = createPublicClient();
+
+  const [directionsResult, newsResult, eventsResult, galleryResult] = await Promise.all([
+    supabase
+      .from("directions")
+      .select("id, slug, title, short_description, description, symbol")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .returns<DirectionRow[]>(),
+    supabase
+      .from("news")
+      .select("id, published_at, title, text, kind")
+      .eq("is_active", true)
+      .order("published_at", { ascending: false })
+      .limit(3)
+      .returns<NewsRow[]>(),
+    supabase
+      .from("events")
+      .select("id, event_date, title, text")
+      .eq("is_active", true)
+      .order("event_date", { ascending: true })
+      .limit(3)
+      .returns<EventRow[]>(),
+    publicSupabase
+      .from("gallery_items")
+      .select("id, title, image_url")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .limit(4)
+      .returns<GalleryRow[]>(),
+  ]);
+
+  if (directionsResult.error) {
+    console.error("Supabase: yo‘nalishlarni yuklashda xatolik:", directionsResult.error);
+  }
+  if (newsResult.error) {
+    console.error("Supabase: yangiliklarni yuklashda xatolik:", newsResult.error);
+  }
+  if (eventsResult.error) {
+    console.error("Supabase: tadbirlarni yuklashda xatolik:", eventsResult.error);
+  }
+  if (galleryResult.error) {
+    console.error("Supabase: galereyani yuklashda xatolik:", galleryResult.error);
+  }
+
+  const directions = directionsResult.data ?? [];
+  const news = newsResult.data ?? [];
+  const events = eventsResult.data ?? [];
+  const galleryItems = galleryResult.data ?? [];
+
   return (
     <>
       <section className="hero" id="home">
@@ -96,18 +203,26 @@ export default function Home() {
             action={{ href: "/yonalishlar", label: "Barcha yo‘nalishlar" }}
           />
 
-          <div className="program-grid">
-            {directions.map((direction, index) => (
-              <DirectionCard
-                key={direction.slug}
-                number={`0${index + 1}`}
-                symbol={direction.symbol}
-                title={direction.title}
-                description={direction.shortDescription}
-                href={`/yonalishlar/${direction.slug}`}
-              />
-            ))}
-          </div>
+          {directionsResult.error ? (
+            <p className="page-note">
+              <strong>Diqqat:</strong> yo‘nalishlar ro‘yxatini yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
+            </p>
+          ) : directions.length === 0 ? (
+            <p className="page-note">Hozircha faol yo‘nalishlar mavjud emas.</p>
+          ) : (
+            <div className="program-grid">
+              {directions.map((direction, index) => (
+                <DirectionCard
+                  key={direction.id}
+                  number={`0${index + 1}`}
+                  symbol={direction.symbol}
+                  title={direction.title}
+                  description={direction.short_description}
+                  href={`/yonalishlar/${direction.slug}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -119,19 +234,27 @@ export default function Home() {
             action={{ href: "/yangiliklar", label: "Barcha yangiliklar" }}
           />
 
-          <div className="news-grid">
-            {newsItems.slice(0, 3).map((item, index) => (
-              <NewsCard
-                key={item.id}
-                date={item.date}
-                title={item.title}
-                text={item.text}
-                kind={item.kind}
-                variant={((index % 3) + 1) as 1 | 2 | 3}
-                href="/yangiliklar"
-              />
-            ))}
-          </div>
+          {newsResult.error ? (
+            <p className="page-note">
+              <strong>Diqqat:</strong> yangiliklarni yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
+            </p>
+          ) : news.length === 0 ? (
+            <p className="page-note">Hozircha yangiliklar mavjud emas.</p>
+          ) : (
+            <div className="news-grid">
+              {news.map((item, index) => (
+                <NewsCard
+                  key={item.id}
+                  date={formatNewsDate(item.published_at)}
+                  title={item.title}
+                  text={item.text}
+                  kind={item.kind}
+                  variant={((index % 3) + 1) as 1 | 2 | 3}
+                  href="/yangiliklar"
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -144,9 +267,18 @@ export default function Home() {
               <Link className="text-link" href="/tadbirlar">Barchasi →</Link>
             </div>
 
-            {eventItems.slice(0, 3).map((item) => (
-              <EventCard key={item.id} day={item.day} month={item.month} title={item.title} text={item.text} />
-            ))}
+            {eventsResult.error ? (
+              <p className="page-note">
+                <strong>Diqqat:</strong> tadbirlarni yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
+              </p>
+            ) : events.length === 0 ? (
+              <p className="page-note">Hozircha rejalashtirilgan tadbirlar mavjud emas.</p>
+            ) : (
+              events.map((item) => {
+                const { day, month } = formatEventDate(item.event_date);
+                return <EventCard key={item.id} day={day} month={month} title={item.title} text={item.text} />;
+              })
+            )}
           </div>
 
           <div className="panel achievements" id="achievements">
@@ -156,9 +288,7 @@ export default function Home() {
               <Link className="text-link" href="/yutuqlar">Barchasi →</Link>
             </div>
 
-            <div className="achievement"><div className="achievement-icon">🏆</div><div><h3>Informatika olimpiadasi</h3><p>Tuman bosqichida 1-o‘rin</p></div></div>
-            <div className="achievement"><div className="achievement-icon">🤖</div><div><h3>Robototexnika musobaqasi</h3><p>Viloyat bosqichida 2-o‘rin</p></div></div>
-            <div className="achievement"><div className="achievement-icon">🥇</div><div><h3>Ingliz tili tanlovi</h3><p>Tuman bosqichida 1, 2, 3-o‘rinlar</p></div></div>
+            <p className="page-note">Hozircha bu bo‘limda aniq ma’lumotlar mavjud emas.</p>
           </div>
         </div>
       </section>
@@ -171,12 +301,25 @@ export default function Home() {
             action={{ href: "/galereya", label: "Barcha foto va videolar" }}
           />
 
-          <div className="gallery-grid">
-            <div className="gallery-item gallery-one"><span>IT mashg‘ulotlari</span></div>
-            <div className="gallery-item gallery-two"><span>Robototexnika</span></div>
-            <div className="gallery-item gallery-three"><span>O‘quvchilarimiz</span></div>
-            <div className="gallery-item gallery-four"><span>Tadbirlar</span></div>
-          </div>
+          {galleryResult.error ? (
+            <p className="page-note">
+              <strong>Diqqat:</strong> galereya lavhalarini yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
+            </p>
+          ) : galleryItems.length === 0 ? (
+            <p className="page-note">Hozircha galereya lavhalari mavjud emas.</p>
+          ) : (
+            <div className="gallery-grid">
+              {galleryItems.map((item, index) => (
+                <div key={item.id} className={`gallery-item ${GALLERY_POSITION_CLASSES[index]}`}>
+                  {item.image_url ? (
+                    <Image src={item.image_url} alt={item.title} fill style={{ objectFit: "cover" }} />
+                  ) : (
+                    <span>{item.title}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

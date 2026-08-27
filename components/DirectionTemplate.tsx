@@ -1,7 +1,14 @@
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
 import SectionTitle from "@/components/SectionTitle";
-import type { Direction } from "@/lib/content";
+
+type Direction = {
+  slug: string;
+  title: string;
+  shortDescription: string;
+  description: string;
+  symbol: string;
+};
 
 export default function DirectionTemplate({ direction }: { direction: Direction }) {
   return (
