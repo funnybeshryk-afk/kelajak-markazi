@@ -4,8 +4,11 @@ import SectionTitle from "@/components/SectionTitle";
 import NewsCard from "@/components/NewsCard";
 import EventCard from "@/components/EventCard";
 import DirectionCard from "@/components/DirectionCard";
+import HeroPhoto from "@/components/HeroPhoto";
 import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
+
+const GALLERY_BUCKET = "gallery";
 
 type DirectionRow = {
   id: string;
@@ -113,6 +116,14 @@ export default async function Home() {
   const events = eventsResult.data ?? [];
   const galleryItems = galleryResult.data ?? [];
 
+  // Active gallery item with the lowest sort_order — reuses the same query
+  // above rather than a second round trip, since galleryItems is already
+  // ordered ascending by sort_order.
+  const heroGalleryItem = galleryItems[0];
+  const heroImageUrl = heroGalleryItem?.image_url
+    ? publicSupabase.storage.from(GALLERY_BUCKET).getPublicUrl(heroGalleryItem.image_url).data.publicUrl
+    : null;
+
   return (
     <>
       <section className="hero" id="home">
@@ -140,11 +151,7 @@ export default async function Home() {
             <div className="hero-orb orb-one" />
             <div className="hero-orb orb-two" />
             <div className="hero-card main-photo">
-              <div className="photo-placeholder">
-                <div className="photo-icon">👩‍💻</div>
-                <strong>Kelajak Markazi</strong>
-                <span>Yoshlar bilan birga</span>
-              </div>
+              <HeroPhoto imageUrl={heroImageUrl} />
             </div>
             <div className="floating-card">
               <span className="floating-icon">✦</span>
@@ -309,15 +316,21 @@ export default async function Home() {
             <p className="page-note">Hozircha galereya lavhalari mavjud emas.</p>
           ) : (
             <div className="gallery-grid">
-              {galleryItems.map((item, index) => (
-                <div key={item.id} className={`gallery-item ${GALLERY_POSITION_CLASSES[index]}`}>
-                  {item.image_url ? (
-                    <Image src={item.image_url} alt={item.title} fill style={{ objectFit: "cover" }} />
-                  ) : (
-                    <span>{item.title}</span>
-                  )}
-                </div>
-              ))}
+              {galleryItems.map((item, index) => {
+                const imageUrl = item.image_url
+                  ? publicSupabase.storage.from(GALLERY_BUCKET).getPublicUrl(item.image_url).data.publicUrl
+                  : null;
+
+                return (
+                  <div key={item.id} className={`gallery-item ${GALLERY_POSITION_CLASSES[index]}`}>
+                    {imageUrl ? (
+                      <Image src={imageUrl} alt={item.title} fill style={{ objectFit: "cover" }} />
+                    ) : (
+                      <span>{item.title}</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
