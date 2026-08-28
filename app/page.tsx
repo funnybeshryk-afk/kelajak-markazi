@@ -7,6 +7,7 @@ import DirectionCard from "@/components/DirectionCard";
 import HeroPhoto from "@/components/HeroPhoto";
 import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
+import { getSiteSettings, getTelegramUrl } from "@/lib/site-settings";
 
 const GALLERY_BUCKET = "gallery";
 
@@ -77,7 +78,7 @@ export default async function Home() {
   // match how event_date is otherwise treated in this file (formatEventDate).
   const todayStr = new Date().toISOString().slice(0, 10);
 
-  const [directionsResult, newsResult, eventsResult, galleryResult, directionPhotosResult] = await Promise.all([
+  const [directionsResult, newsResult, eventsResult, galleryResult, directionPhotosResult, siteSettings] = await Promise.all([
     supabase
       .from("directions")
       .select("id, slug, title, short_description, description, symbol")
@@ -113,6 +114,10 @@ export default async function Home() {
       .select("title, image_url")
       .eq("is_active", true)
       .returns<GalleryTitleRow[]>(),
+    // Already-existing helper (same one /boglanish uses) — resolves to a full
+    // SiteSettings object regardless of Supabase errors, no extra error
+    // handling needed here.
+    getSiteSettings(),
   ]);
 
   if (directionsResult.error) {
@@ -135,6 +140,7 @@ export default async function Home() {
   const news = newsResult.data ?? [];
   const events = eventsResult.data ?? [];
   const galleryItems = galleryResult.data ?? [];
+  const telegramUrl = getTelegramUrl(siteSettings.telegram);
 
   // Real photos matched by exact title against gallery_items — no new
   // table/column, reuses the existing bucket.
@@ -361,7 +367,7 @@ export default async function Home() {
         <div className="container telegram-inner">
           <div className="telegram-icon">➤</div>
           <div><strong>Yangiliklarimizdan xabardor bo‘lib boring!</strong><span>Telegram kanalimizga obuna bo‘ling.</span></div>
-          <Link className="telegram-button" href="/boglanish">Obuna bo‘lish</Link>
+          <a className="telegram-button" href={telegramUrl} target="_blank" rel="noopener noreferrer">Obuna bo‘lish</a>
         </div>
       </section>
     </>

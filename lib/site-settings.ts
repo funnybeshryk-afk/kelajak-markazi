@@ -10,6 +10,14 @@ export type SiteSettings = {
   telegram: string;
 };
 
+// Normalizes a Telegram handle (site_settings.telegram, e.g. "@kelajakmarkazi",
+// possibly with stray whitespace or a doubled "@") into a real t.me URL —
+// never "https://t.me/@handle".
+export function getTelegramUrl(handle: string): string {
+  const username = handle.replace(/\s+/g, "").replace(/^@+/, "");
+  return `https://t.me/${username}`;
+}
+
 // Same values currently hardcoded in Header/Footer/boglanish — used whenever
 // Supabase is unreachable, errors, or has no active row yet.
 const FALLBACK_SITE_SETTINGS: SiteSettings = {
