@@ -73,6 +73,10 @@ export default async function Home() {
   const supabase = await createClient();
   const publicSupabase = createPublicClient();
 
+  // Computed fresh on every request (page is already dynamic) — UTC-based to
+  // match how event_date is otherwise treated in this file (formatEventDate).
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   const [directionsResult, newsResult, eventsResult, galleryResult, directionPhotosResult] = await Promise.all([
     supabase
       .from("directions")
@@ -91,6 +95,7 @@ export default async function Home() {
       .from("events")
       .select("id, event_date, title, text")
       .eq("is_active", true)
+      .gte("event_date", todayStr)
       .order("event_date", { ascending: true })
       .limit(3)
       .returns<EventRow[]>(),
