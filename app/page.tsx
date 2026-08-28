@@ -152,7 +152,6 @@ export default async function Home() {
       <section className="hero" id="home">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <div className="eyebrow">BESHARIQ TUMANI</div>
             <h1>
               Kelajakni
               <br />
@@ -175,13 +174,6 @@ export default async function Home() {
             <div className="hero-orb orb-two" />
             <div className="hero-card main-photo">
               <HeroPhoto imageUrl={heroImageUrl} />
-            </div>
-            <div className="floating-card">
-              <span className="floating-icon">✦</span>
-              <div>
-                <strong>Kelajak sari</strong>
-                <small>Har kuni yangi imkoniyat</small>
-              </div>
             </div>
           </div>
         </div>
