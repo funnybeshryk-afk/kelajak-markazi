@@ -40,6 +40,11 @@ type GalleryRow = {
   image_url: string | null;
 };
 
+type GalleryTitleRow = {
+  title: string;
+  image_url: string | null;
+};
+
 // Matches the fixed 4-slot bento layout in globals.css (.gallery-one spans two
 // rows, .gallery-four spans two columns) — positional, not a cyclic pattern.
 const GALLERY_POSITION_CLASSES = ["gallery-one", "gallery-two", "gallery-three", "gallery-four"];
@@ -68,7 +73,7 @@ export default async function Home() {
   const supabase = await createClient();
   const publicSupabase = createPublicClient();
 
-  const [directionsResult, newsResult, eventsResult, galleryResult] = await Promise.all([
+  const [directionsResult, newsResult, eventsResult, galleryResult, directionPhotosResult] = await Promise.all([
     supabase
       .from("directions")
       .select("id, slug, title, short_description, description, symbol")
@@ -96,6 +101,13 @@ export default async function Home() {
       .order("sort_order", { ascending: true })
       .limit(4)
       .returns<GalleryRow[]>(),
+    // Independent of the gallery teaser query above (which is intentionally
+    // capped to 4) — used only to match direction photos by title.
+    publicSupabase
+      .from("gallery_items")
+      .select("title, image_url")
+      .eq("is_active", true)
+      .returns<GalleryTitleRow[]>(),
   ]);
 
   if (directionsResult.error) {
@@ -110,11 +122,22 @@ export default async function Home() {
   if (galleryResult.error) {
     console.error("Supabase: galereyani yuklashda xatolik:", galleryResult.error);
   }
+  if (directionPhotosResult.error) {
+    console.error("Supabase: yo‘nalish rasmlarini yuklashda xatolik:", directionPhotosResult.error);
+  }
 
   const directions = directionsResult.data ?? [];
   const news = newsResult.data ?? [];
   const events = eventsResult.data ?? [];
   const galleryItems = galleryResult.data ?? [];
+
+  // Real photos matched by exact title against gallery_items — no new
+  // table/column, reuses the existing bucket.
+  const directionPhotoByTitle = new Map(
+    (directionPhotosResult.data ?? [])
+      .filter((row): row is GalleryTitleRow & { image_url: string } => Boolean(row.image_url))
+      .map((row) => [row.title, publicSupabase.storage.from(GALLERY_BUCKET).getPublicUrl(row.image_url).data.publicUrl])
+  );
 
   // Active gallery item with the lowest sort_order — reuses the same query
   // above rather than a second round trip, since galleryItems is already
@@ -226,6 +249,7 @@ export default async function Home() {
                   title={direction.title}
                   description={direction.short_description}
                   href={`/yonalishlar/${direction.slug}`}
+                  imageUrl={directionPhotoByTitle.get(direction.title) ?? null}
                 />
               ))}
             </div>

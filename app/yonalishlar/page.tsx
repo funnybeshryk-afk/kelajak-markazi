@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Kelajak Markazi Beshariq tumani yo‘nalishlari: IT va dasturlash, Robototexnika, Ingliz tili, Ijodiy yo‘nalishlar.",
 };
 
+const GALLERY_BUCKET = "gallery";
+
 type DirectionRow = {
   id: string;
   slug: string;
@@ -17,22 +19,47 @@ type DirectionRow = {
   symbol: string;
 };
 
+type GalleryTitleRow = {
+  title: string;
+  image_url: string | null;
+};
+
 export default async function YonalishlarPage() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("directions")
-    .select("id, slug, title, short_description, description, symbol")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true })
-    .returns<DirectionRow[]>();
+  const [directionsResult, photosResult] = await Promise.all([
+    supabase
+      .from("directions")
+      .select("id, slug, title, short_description, description, symbol")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true })
+      .returns<DirectionRow[]>(),
+    supabase
+      .from("gallery_items")
+      .select("title, image_url")
+      .eq("is_active", true)
+      .returns<GalleryTitleRow[]>(),
+  ]);
+
+  const { data, error } = directionsResult;
 
   if (error) {
     // Xatoni yashirmaymiz — server logida ko'rinadi, foydalanuvchiga esa xavfsiz xabar chiqadi.
     console.error("Supabase: yo‘nalishlarni yuklashda xatolik:", error);
   }
+  if (photosResult.error) {
+    console.error("Supabase: yo‘nalish rasmlarini yuklashda xatolik:", photosResult.error);
+  }
 
   const directions = data ?? [];
+
+  // Real photos matched by exact title against gallery_items — no new
+  // table/column, reuses the existing bucket.
+  const photoByTitle = new Map(
+    (photosResult.data ?? [])
+      .filter((row): row is GalleryTitleRow & { image_url: string } => Boolean(row.image_url))
+      .map((row) => [row.title, supabase.storage.from(GALLERY_BUCKET).getPublicUrl(row.image_url).data.publicUrl])
+  );
 
   return (
     <>
@@ -60,6 +87,7 @@ export default async function YonalishlarPage() {
                   title={direction.title}
                   description={direction.short_description}
                   href={`/yonalishlar/${direction.slug}`}
+                  imageUrl={photoByTitle.get(direction.title) ?? null}
                 />
               ))}
             </div>

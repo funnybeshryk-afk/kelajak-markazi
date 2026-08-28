@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
 import SectionTitle from "@/components/SectionTitle";
@@ -8,9 +12,13 @@ type Direction = {
   shortDescription: string;
   description: string;
   symbol: string;
+  imageUrl: string | null;
 };
 
 export default function DirectionTemplate({ direction }: { direction: Direction }) {
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(direction.imageUrl) && !failed;
+
   return (
     <>
       <PageHero eyebrow="YO‘NALISH" title={direction.title} description={direction.shortDescription} />
@@ -18,9 +26,21 @@ export default function DirectionTemplate({ direction }: { direction: Direction 
       <section className="section">
         <div className="container direction-grid">
           <div className="direction-image-placeholder">
-            <span className="direction-symbol">{direction.symbol}</span>
-            <strong>{direction.title}</strong>
-            <small>Rasm keyinroq qo‘shiladi</small>
+            {showImage ? (
+              <Image
+                src={direction.imageUrl as string}
+                alt={direction.title}
+                fill
+                sizes="(max-width: 800px) 100vw, 50vw"
+                style={{ objectFit: "cover" }}
+                onError={() => setFailed(true)}
+              />
+            ) : (
+              <>
+                <span className="direction-symbol">{direction.symbol}</span>
+                <strong>{direction.title}</strong>
+              </>
+            )}
           </div>
 
           <div className="direction-content">

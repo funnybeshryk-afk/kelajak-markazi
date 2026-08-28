@@ -16,7 +16,10 @@ type DirectionData = {
   shortDescription: string;
   description: string;
   symbol: string;
+  imageUrl: string | null;
 };
+
+const GALLERY_BUCKET = "gallery";
 
 const metaDescriptions: Record<string, string> = {
   "it-dasturlash": "Kelajak Markazi IT va dasturlash yo‘nalishi haqida ma’lumot.",
@@ -90,12 +93,26 @@ export default async function DirectionPage({ params }: DirectionPageProps) {
     notFound();
   }
 
+  // Real photo for this direction, matched by exact title against
+  // gallery_items — no new table/column, reuses the existing bucket.
+  const { data: photoRow } = await supabase
+    .from("gallery_items")
+    .select("image_url")
+    .eq("title", data.title)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  const imageUrl = photoRow?.image_url
+    ? supabase.storage.from(GALLERY_BUCKET).getPublicUrl(photoRow.image_url).data.publicUrl
+    : null;
+
   const direction: DirectionData = {
     slug: data.slug,
     title: data.title,
     shortDescription: data.short_description,
     description: data.description,
     symbol: data.symbol,
+    imageUrl,
   };
 
   return <DirectionTemplate direction={direction} />;
