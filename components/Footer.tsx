@@ -45,11 +45,6 @@ export default async function Footer({ siteSettings }: FooterProps) {
         <div className="footer-brand">
           <Image src="/images/logo.png" alt="Kelajak Markazi" width={170} height={66} />
           <p>Kelajak Markazi Beshariq tumani yoshlarga bilim va imkoniyatlar uchun o‘z eshiklarini ochadi.</p>
-          <div className="socials">
-            <span>◉</span>
-            <span>◎</span>
-            <span>f</span>
-          </div>
         </div>
         <div>
           <h4>Sayt bo‘limlari</h4>
@@ -80,7 +75,6 @@ export default async function Footer({ siteSettings }: FooterProps) {
       </div>
       <div className="container footer-bottom">
         <span>© 2026 Kelajak Markazi Beshariq tumani. Barcha huquqlar himoyalangan.</span>
-        <span>O‘zbekcha · Русский · English</span>
       </div>
     </footer>
   );
