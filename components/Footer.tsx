@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getTelegramUrl, type SiteSettings } from "@/lib/site-settings";
+import { getMailtoUrl, getTelUrl, getTelegramUrl, type SiteSettings } from "@/lib/site-settings";
 import { createPublicClient } from "@/lib/supabase/public";
 
 type FooterProps = {
@@ -38,6 +38,8 @@ export default async function Footer({ siteSettings }: FooterProps) {
 
   const directions = data && data.length > 0 ? data : FALLBACK_DIRECTIONS;
   const telegramUrl = getTelegramUrl(siteSettings.telegram);
+  const telUrl = getTelUrl(siteSettings.phone);
+  const mailtoUrl = getMailtoUrl(siteSettings.email);
 
   return (
     <footer className="footer">
@@ -68,8 +70,8 @@ export default async function Footer({ siteSettings }: FooterProps) {
         <div>
           <h4>Bog‘lanish</h4>
           <p>📍 {siteSettings.address}</p>
-          <p>☎️ {siteSettings.phone}</p>
-          <p>✉️ {siteSettings.email}</p>
+          <a href={telUrl}>☎️ {siteSettings.phone}</a>
+          <a href={mailtoUrl}>✉️ {siteSettings.email}</a>
           <a href={telegramUrl} target="_blank" rel="noopener noreferrer">➤ {siteSettings.telegram}</a>
         </div>
       </div>

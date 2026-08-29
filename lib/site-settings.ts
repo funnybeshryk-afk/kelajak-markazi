@@ -18,6 +18,23 @@ export function getTelegramUrl(handle: string): string {
   return `https://t.me/${username}`;
 }
 
+// Normalizes a phone number for a tel: link — strips everything except digits
+// and a leading "+", since site_settings.phone is stored with spaces for
+// display (e.g. "+998 90 123 45 67").
+export function getTelUrl(phone: string): string {
+  return `tel:${phone.replace(/[^\d+]/g, "")}`;
+}
+
+export function getMailtoUrl(email: string): string {
+  return `mailto:${email.trim()}`;
+}
+
+// Google Maps text-search URL — no coordinates needed/available, matches how
+// the address is already stored as plain text.
+export function getMapsUrl(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
 // Same values currently hardcoded in Header/Footer/boglanish — used whenever
 // Supabase is unreachable, errors, or has no active row yet.
 const FALLBACK_SITE_SETTINGS: SiteSettings = {

@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 type NewsCardProps = {
@@ -7,12 +11,25 @@ type NewsCardProps = {
   kind: string;
   href?: string;
   variant?: 1 | 2 | 3;
+  imageUrl?: string | null;
 };
 
-export default function NewsCard({ date, title, text, kind, href = "/yangiliklar", variant = 1 }: NewsCardProps) {
+export default function NewsCard({ date, title, text, kind, href = "/yangiliklar", variant = 1, imageUrl = null }: NewsCardProps) {
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(imageUrl) && !failed;
+
   return (
     <article className="news-card">
-      <div className={`news-image image-${variant}`}>
+      <div className={showImage ? "news-image" : `news-image image-${variant}`}>
+        {showImage && (
+          <Image
+            src={imageUrl as string}
+            alt={title}
+            fill
+            style={{ objectFit: "cover" }}
+            onError={() => setFailed(true)}
+          />
+        )}
         <span>{kind}</span>
       </div>
       <div className="news-content">
