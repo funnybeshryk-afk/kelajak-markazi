@@ -45,7 +45,7 @@ export default async function Footer({ siteSettings }: FooterProps) {
     <footer className="footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Image src="/images/logo.png" alt="Kelajak Markazi" width={170} height={66} />
+          <Image src="/images/logo.png" alt="Kelajak Markazi Beshariq tumani" width={170} height={66} />
           <p>Kelajak Markazi Beshariq tumani yoshlarga bilim va imkoniyatlar uchun o‘z eshiklarini ochadi.</p>
         </div>
         <div>

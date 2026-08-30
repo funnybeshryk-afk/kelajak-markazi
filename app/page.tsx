@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getSiteSettings, getTelegramUrl } from "@/lib/site-settings";
 
-const SITE_TITLE = "Kelajak Markazi — Beshariq tumani";
+const SITE_TITLE = "Kelajak Markazi Beshariq tumani";
 const SITE_DESCRIPTION = "Kelajak Markazi Beshariq tumani — zamonaviy ta’lim, innovatsiya va yoshlar uchun yangi imkoniyatlar.";
 
 // Only the homepage gets Open Graph / Twitter Card / canonical metadata — other
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     url: "https://kelajak-markazi.vercel.app/",
-    siteName: "Kelajak Markazi",
+    siteName: "Kelajak Markazi Beshariq tumani",
     type: "website",
     images: [{ url: "/images/logo.png", width: 1672, height: 941 }],
   },

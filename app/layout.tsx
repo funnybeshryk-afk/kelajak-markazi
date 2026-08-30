@@ -6,7 +6,7 @@ import { getSiteSettingsStatic } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://kelajak-markazi.vercel.app"),
-  title: "Kelajak Markazi — Beshariq tumani",
+  title: "Kelajak Markazi Beshariq tumani",
   description: "Kelajak Markazi Beshariq tumani — zamonaviy ta’lim, innovatsiya va yoshlar uchun yangi imkoniyatlar.",
 };
 
