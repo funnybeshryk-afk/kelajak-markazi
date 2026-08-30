@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import SectionTitle from "@/components/SectionTitle";
@@ -8,6 +9,31 @@ import HeroPhoto from "@/components/HeroPhoto";
 import { createClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getSiteSettings, getTelegramUrl } from "@/lib/site-settings";
+
+const SITE_TITLE = "Kelajak Markazi — Beshariq tumani";
+const SITE_DESCRIPTION = "Kelajak Markazi Beshariq tumani — zamonaviy ta’lim, innovatsiya va yoshlar uchun yangi imkoniyatlar.";
+
+// Only the homepage gets Open Graph / Twitter Card / canonical metadata — other
+// routes keep their own existing title+description-only metadata untouched.
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://kelajak-markazi.vercel.app/",
+  },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "https://kelajak-markazi.vercel.app/",
+    siteName: "Kelajak Markazi",
+    type: "website",
+    images: [{ url: "/images/logo.png", width: 1672, height: 941 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/images/logo.png"],
+  },
+};
 
 const GALLERY_BUCKET = "gallery";
 
