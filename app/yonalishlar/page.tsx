@@ -69,7 +69,7 @@ export default async function YonalishlarPage() {
         description="Markazimizda yoshlar o‘z qiziqishlariga mos yo‘nalishni tanlab, bilim va ko‘nikmalarini rivojlantirishlari mumkin."
       />
 
-      <section className="section">
+      <section className="section direction-listing">
         <div className="container">
           {error ? (
             <p className="page-note">

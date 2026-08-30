@@ -67,7 +67,7 @@ export default async function YangiliklarPage() {
           ) : news.length === 0 ? (
             <p className="page-note">Hozircha yangiliklar mavjud emas.</p>
           ) : (
-            <div className="news-grid">
+            <div className="news-grid news-grid-featured">
               {news.map((item, index) => {
                 const imageUrl = item.image_url
                   ? publicSupabase.storage.from(GALLERY_BUCKET).getPublicUrl(item.image_url).data.publicUrl

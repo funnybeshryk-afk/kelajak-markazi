@@ -55,7 +55,7 @@ export default async function BizHaqimizdaPage() {
 
       <section className="section">
         <div className="container about-page-grid">
-          <div className="about-page-block">
+          <div className="about-page-block about-intro">
             <SectionTitle label="BIZ HAQIMIZDA" title={<>Kelajak Markazi <span>haqida</span></>} />
             <p>
               Kelajak Markazi — Beshariq tumani yoshlari uchun bilim olish, yangi ko‘nikmalar

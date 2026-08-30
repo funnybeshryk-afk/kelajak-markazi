@@ -67,7 +67,7 @@ export default async function TadbirlarPage() {
           ) : events.length === 0 ? (
             <p className="page-note">Hozircha rejalashtirilgan tadbirlar mavjud emas.</p>
           ) : (
-            <div className="panel">
+            <div className="panel events-timeline">
               {events.map((item) => {
                 const { day, month } = formatEventDate(item.event_date);
                 return <EventCard key={item.id} day={day} month={month} title={item.title} text={item.text} />;
