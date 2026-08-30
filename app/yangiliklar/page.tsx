@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import NewsCard from "@/components/NewsCard";
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 
 export const metadata: Metadata = {
   title: "Yangiliklar — Kelajak Markazi",
   description: "Kelajak Markazi Beshariq tumani hayotidan so‘nggi yangiliklar.",
 };
+
+const GALLERY_BUCKET = "gallery";
 
 type NewsRow = {
   id: string;
@@ -14,6 +17,7 @@ type NewsRow = {
   title: string;
   text: string;
   kind: string;
+  image_url: string | null;
 };
 
 const UZ_MONTHS = [
@@ -30,10 +34,11 @@ function formatNewsDate(iso: string) {
 
 export default async function YangiliklarPage() {
   const supabase = await createClient();
+  const publicSupabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("news")
-    .select("id, published_at, title, text, kind")
+    .select("id, published_at, title, text, kind, image_url")
     .eq("is_active", true)
     .order("published_at", { ascending: false })
     .returns<NewsRow[]>();
@@ -68,17 +73,24 @@ export default async function YangiliklarPage() {
             <p className="page-note">Hozircha yangiliklar mavjud emas.</p>
           ) : (
             <div className="news-grid">
-              {news.map((item, index) => (
-                <NewsCard
-                  key={item.id}
-                  date={formatNewsDate(item.published_at)}
-                  title={item.title}
-                  text={item.text}
-                  kind={item.kind}
-                  variant={((index % 3) + 1) as 1 | 2 | 3}
-                  href="/yangiliklar"
-                />
-              ))}
+              {news.map((item, index) => {
+                const imageUrl = item.image_url
+                  ? publicSupabase.storage.from(GALLERY_BUCKET).getPublicUrl(item.image_url).data.publicUrl
+                  : null;
+
+                return (
+                  <NewsCard
+                    key={item.id}
+                    date={formatNewsDate(item.published_at)}
+                    title={item.title}
+                    text={item.text}
+                    kind={item.kind}
+                    variant={((index % 3) + 1) as 1 | 2 | 3}
+                    href="/yangiliklar"
+                    imageUrl={imageUrl}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
