@@ -330,7 +330,10 @@ export default async function Home() {
               <Link className="text-link" href="/yutuqlar">Barchasi →</Link>
             </div>
 
-            <p className="page-note">Hozircha bu bo‘limda aniq ma’lumotlar mavjud emas.</p>
+            <div className="achievements-empty">
+              <div className="achievements-empty-icon">🏆</div>
+              <p className="page-note">Hozircha bu bo‘limda aniq ma’lumotlar mavjud emas.</p>
+            </div>
           </div>
         </div>
       </section>
