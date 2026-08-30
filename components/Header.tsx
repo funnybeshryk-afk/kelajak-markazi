@@ -27,7 +27,7 @@ export default function Header() {
     <header className="header">
       <div className="container nav">
         <Link className="brand" href="/">
-          <Image src="/images/logo.png" alt="Kelajak Markazi Beshariq tumani" width={180} height={70} priority />
+          <Image src="/images/logo.png" alt="Kelajak Markazi Beshariq tumani" width={180} height={99} priority />
         </Link>
 
         <nav>

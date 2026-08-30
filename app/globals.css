@@ -130,7 +130,8 @@ h2 { margin: 12px 0 0; font-size: clamp(34px,4vw,50px); letter-spacing: -.045em;
 
 .footer { background: #21103f; color: white; padding: 65px 0 25px; }
 .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 55px; }
-.footer-brand img { filter: brightness(0) invert(1); width: 155px; }
+.footer-logo-badge { display: inline-flex; background: #fff; border-radius: 14px; padding: 10px 14px; }
+.footer-brand img { display: block; width: 140px; height: auto; }
 .footer-brand p { max-width: 280px; color: #b8acc9; font-size: 12px; line-height: 1.65; }
 .footer h4 { margin: 7px 0 20px; font-size: 13px; }
 .footer a { display: block; color: #b8acc9; font-size: 12px; margin: 0 0 11px; }
@@ -217,6 +218,7 @@ h2 { margin: 12px 0 0; font-size: clamp(34px,4vw,50px); letter-spacing: -.045em;
 @media (max-width: 800px) {
   .container { width: min(100% - 30px, 680px); }
   .nav { height: 70px; }
+  .brand img { width: auto; height: 38px; }
   .nav nav { display: none; }
   .menu-button { display: block; }
   .mobile-nav { display: flex; flex-direction: column; gap: 4px; padding: 8px 0 20px; border-top: 1px solid var(--line); }
