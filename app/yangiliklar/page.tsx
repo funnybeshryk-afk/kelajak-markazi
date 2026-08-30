@@ -60,11 +60,6 @@ export default async function YangiliklarPage() {
 
       <section className="section">
         <div className="container">
-          <p className="page-note">
-            <strong>Diqqat:</strong> quyidagi yangiliklar namuna sifatida joylashtirilgan bo‘lib,
-            tez orada haqiqiy materiallar bilan almashtiriladi.
-          </p>
-
           {error ? (
             <p className="page-note">
               <strong>Diqqat:</strong> yangiliklarni yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
@@ -86,7 +81,6 @@ export default async function YangiliklarPage() {
                     text={item.text}
                     kind={item.kind}
                     variant={((index % 3) + 1) as 1 | 2 | 3}
-                    href="/yangiliklar"
                     imageUrl={imageUrl}
                   />
                 );

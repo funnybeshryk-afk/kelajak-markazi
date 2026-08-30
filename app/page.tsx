@@ -290,7 +290,6 @@ export default async function Home() {
                     text={item.text}
                     kind={item.kind}
                     variant={((index % 3) + 1) as 1 | 2 | 3}
-                    href="/yangiliklar"
                     imageUrl={imageUrl}
                   />
                 );

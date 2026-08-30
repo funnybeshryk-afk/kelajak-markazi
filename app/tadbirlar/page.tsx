@@ -31,10 +31,15 @@ function formatEventDate(dateStr: string) {
 export default async function TadbirlarPage() {
   const supabase = await createClient();
 
+  // Computed fresh on every request (page is already dynamic) — UTC-based to
+  // match how event_date is otherwise treated in this file (formatEventDate).
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   const { data, error } = await supabase
     .from("events")
     .select("id, event_date, title, text")
     .eq("is_active", true)
+    .gte("event_date", todayStr)
     .order("event_date", { ascending: true })
     .returns<EventRow[]>();
 
@@ -55,11 +60,6 @@ export default async function TadbirlarPage() {
 
       <section className="section">
         <div className="container">
-          <p className="page-note">
-            <strong>Diqqat:</strong> quyidagi sana va tadbirlar namuna sifatida keltirilgan bo‘lib,
-            haqiqiy voqealarni ifodalamaydi. Aniq jadval tez orada e’lon qilinadi.
-          </p>
-
           {error ? (
             <p className="page-note">
               <strong>Diqqat:</strong> tadbirlarni yuklab bo‘lmadi. Iltimos, sahifani keyinroq qayta yuklab ko‘ring.
